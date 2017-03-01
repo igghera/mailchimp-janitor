@@ -3,16 +3,30 @@ const Converter = require('csvtojson').Converter;
 const path = require('path');
 const chalk = require('chalk');
 
-let listaDettagli;
+let listaFinale;
+let listaBounced;
 
-new Converter({}).fromFile('./lists/input/russia.csv', (err, dettagli) => {
-  listaDettagli = dettagli;
+new Converter({})
+.fromFile('./lists/input/garganti.csv', (err, dettagli) => {
+  if (err) { console.log(`error: ${err}`); }
 
-  // Rimuovi duplicati dalla lista dettagli
-  listaDettagli = removeDuplicates(listaDettagli, 'Dettagli');
+  listaFinale = dettagli;
 
-  // Esporta lista di indirizzi da importare in Mailchimp
-  printListaMailchimp(listaDettagli);
+  new Converter({})
+  .fromFile('./lists/input/bounced.csv', (err, bounced) => {
+    if (err) { console.log(`error: ${err}`); }
+
+    listaBounced = bounced;
+
+    // Rimuovo duplicati
+    listaFinale = removeDuplicates(listaFinale, 'Garganti');
+
+    // Rimuovo bounced
+    listaFinale = removeBounced(listaFinale, listaBounced, 'Garganti');
+
+    // Esporta lista di indirizzi da importare in Mailchimp
+    printListaMailchimp(listaFinale);
+  });
 });
 
 // Remove duplicate contacts from an input list
